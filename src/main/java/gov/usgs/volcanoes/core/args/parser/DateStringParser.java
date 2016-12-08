@@ -9,6 +9,8 @@ package gov.usgs.volcanoes.core.args.parser;
 import com.martiansoftware.jsap.ParseException;
 import com.martiansoftware.jsap.StringParser;
 
+import gov.usgs.volcanoes.core.time.Time;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -39,7 +41,13 @@ public class DateStringParser extends StringParser {
     try {
       result = format.parse(arg);
     } catch (java.text.ParseException e) {
-      throw new ParseException("Unable to convert '" + arg + "' to a Date.");
+      double span = Time.getRelativeTime(arg);
+      if (Double.isNaN(span)) {
+        throw new ParseException("Unable to convert '" + arg + "' to a Date or time span.");
+      } else {
+        long time = System.currentTimeMillis() - ((long) ( span * 1000));
+        result = new Date(time);
+      }
     }
     return result;
   }
